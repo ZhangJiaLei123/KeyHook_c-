@@ -6,15 +6,25 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace ConsoleApplication
+namespace Console_KeyHook_Demo
 {
 
+    /**
+     * 键盘监听回调函数实现
+     */
     class Receiver
     {
+        /**
+         * 
+         * vkCode 键盘值, 键盘 一种虚拟键代码。代码必须是 1 到 254 范围中的一个值。
+         * scanCode  dword 值,关键硬件扫描代码。
+         * actionId 正直按下, 负值释放
+         */
         public static int AlarmCallBack(int vkCode, int scanCode, int actionId)
         {
             Console.WriteLine("actionId:{0}, vkCode:{1}, scanCode:{2}", 
                 actionId, vkCode, scanCode);
+           
 
             return 0;
         }

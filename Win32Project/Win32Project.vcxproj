@@ -14,6 +14,7 @@
     <ProjectGuid>{592A9DD6-5F1E-4702-99BB-DAEFC63508D5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Win32Project</RootNamespace>
+    <ProjectName>KeyHook</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
