@@ -2,11 +2,16 @@
 #include <thread>
 #include "Pub_Def.h"
 
-class CPlusThread
+int KbHookThreadStat(CallBackFun fun);
+
+class KbHook
 {
 public:
 	void run(CallBackFun fun);
+	DWORD WINAPI KbHookThread(LPVOID lpParam);
+	
 private:
+	LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l);
 	void WorkFun();
 private:
 	CallBackFun callBack_;

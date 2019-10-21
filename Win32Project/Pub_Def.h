@@ -14,6 +14,7 @@ typedef struct Msg
 
 
 //报警数据回调函数
-typedef int (*CallBackFun)(unsigned char* pData, int nLen);
+//typedef int (*CallBackFun)(unsigned char* pData, int nLen);
+typedef int (*CallBackFun)(int vkCode,int scanCode, int actionId);
 
-DLLAPI void StartRun(CallBackFun pFun);
+DLLAPI int StartRun(CallBackFun pFun);

@@ -2,8 +2,9 @@
 #include "Pub_Def.h"
 #include "CPlusThread.h"
 
-void StartRun(CallBackFun pFun)
+int StartRun(CallBackFun pFun)
 {
-	CPlusThread* pAlarmSer =  new CPlusThread;
-	pAlarmSer->run(pFun);
+	//KbHook* pAlarmSer =  new KbHook;
+	//pAlarmSer->run(pFun);
+	return KbHookThreadStat(pFun);
 }

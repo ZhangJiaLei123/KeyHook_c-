@@ -11,13 +11,13 @@ namespace ConsoleApplication
     {
         //根据DLL中的回调函数的原型声明一个委托类型
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate int CPlusAlarmRun(IntPtr data,int dataLen);
+        public delegate int CPlusAlarmRun(int vkCode, int scanCode, int actionId);
 
         //实例化这个委托。
         static CPlusAlarmRun _alarmCallBack = new CPlusAlarmRun(Receiver.AlarmCallBack);
 
         //DLL的函数alarmRun。
-        [DllImport(@"..\Debug\Win32Project.dll", EntryPoint = "StartRun", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(@"./Win32Project.dll", EntryPoint = "StartRun", CallingConvention = CallingConvention.Cdecl)]
         extern static void StartRun(CPlusAlarmRun alarmCallBack);
 
         public static void StartReceive()

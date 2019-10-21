@@ -35,16 +35,10 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Win32Project.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="dllmain.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CPlusThread.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Pub_Def.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyHook.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
