@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29409.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KeyHook", "KeyHookDll\KeyHookDll.vcxproj", "{592A9DD6-5F1E-4702-99BB-DAEFC63508D5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{592A9DD6-5F1E-4702-99BB-DAEFC63508D5}.Debug|x86.ActiveCfg = Debug|Win32
+		{592A9DD6-5F1E-4702-99BB-DAEFC63508D5}.Debug|x86.Build.0 = Debug|Win32
+		{592A9DD6-5F1E-4702-99BB-DAEFC63508D5}.Release|x86.ActiveCfg = Release|Win32
+		{592A9DD6-5F1E-4702-99BB-DAEFC63508D5}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {00CD14C7-6965-4EB4-9CF2-B333C10C9374}
+	EndGlobalSection
+EndGlobal

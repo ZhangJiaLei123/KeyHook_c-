@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "CPlusThread.h"
+#include "KeyHook.h"
 #include <chrono>
 #include <iostream>
 #include <windows.h>
@@ -104,33 +104,5 @@ int KbHookThreadStat(CallBackFun callBack)
 	}
 	printf("CreateThread scess\n");
 	return 0;
-}
-
-
-
-void KbHook::run(CallBackFun fun)
-{
-	callBack_ = fun;
-	thread_ = std::thread(&KbHook::WorkFun,this);
-}
-
-void KbHook::WorkFun()
-{
-	startTime_ = steady_clock::now().time_since_epoch();
-	while (TRUE)
-	{
-		if (callBack_)
-		{
-			steady_clock::duration currentTime = steady_clock::now().time_since_epoch();
-			long long time_span = duration_cast<milliseconds>(currentTime - startTime_).count();
-			Msg msg;
-			msg.duration = time_span;
-			strcpy_s(msg.note,"C++线程持续运行的毫秒数");
-			memcpy_s(data_,8,(void*)&msg.duration,8);
-			memcpy_s(data_+8,100,(void*)msg.note,100);
-			//callBack_(data_, 108);
-		}
-		Sleep(1000);
-	}
 }
 
