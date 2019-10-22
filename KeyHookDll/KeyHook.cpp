@@ -95,7 +95,7 @@ LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l)
 	}
 	else {
 		char buf[64];
-		sprintf_s(buf, 32, "%s - vkCode [%04x], scanCode [%04x]", info, p->vkCode, scanCode);
+		sprintf_s(buf, 32, "%s - vkCode [%04x], scanCode [%04x], actionId[%d]", info, p->vkCode, scanCode, actionId);
 		SendUdp(buf, NULL);
 	}
 	// always call next hook
