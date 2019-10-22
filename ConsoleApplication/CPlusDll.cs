@@ -38,6 +38,9 @@ namespace Console_KeyHook_Demo
         [DllImport(@"./KeyHook.dll", EntryPoint = "StartRun", CallingConvention = CallingConvention.Cdecl)]
         extern static void StartRun(CPlusAlarmRun alarmCallBack);
 
+        [DllImport(@"./KeyHook.dll", EntryPoint = "MakeKeyHookUdp", CallingConvention = CallingConvention.Cdecl)]
+        extern static void MakeKeyHookUdp(CPlusAlarmRun alarmCallBack);
+
         // 启动键盘钩子服务,后台线程
         public static void StartReceive()
         {

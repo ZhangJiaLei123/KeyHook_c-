@@ -25,7 +25,6 @@ namespace Console_KeyHook_Demo
             Console.WriteLine("actionId:{0}, vkCode:{1}, scanCode:{2}", 
                 actionId, vkCode, scanCode);
            
-
             return 0;
         }
     }

