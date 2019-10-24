@@ -1,0 +1,27 @@
+﻿  KeyHookP.cpp
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(52,22): warning C4244: “return”: 从“_Rep”转换到“UINT16”，可能丢失数据
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(52,22): warning C4244:         with
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(52,22): warning C4244:         [
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(52,22): warning C4244:             _Rep=__int64
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(52,22): warning C4244:         ]
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(147,30): warning C4477: “printf”: 格式字符串“%lld”需要类型“__int64”的参数，但可变参数 3 拥有了类型“int”
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(147,30): message : 请考虑在格式字符串中使用“%d”
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(147,30): message : 请考虑在格式字符串中使用“%Id”
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(147,30): message : 请考虑在格式字符串中使用“%I32d”
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(147,30): warning C4477: “printf”: 格式字符串“%lld”需要类型“__int64”的参数，但可变参数 4 拥有了类型“int”
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(147,30): message : 请考虑在格式字符串中使用“%d”
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(147,30): message : 请考虑在格式字符串中使用“%Id”
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(147,30): message : 请考虑在格式字符串中使用“%I32d”
+  Pub_Def.cpp
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\KeyHookP.cpp(165,28): warning C4244: “参数”: 从“DWORD”转换到“BYTE”，可能丢失数据
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\Pub_Def.cpp(6,1): warning C4273: “StartRun”: dll 链接不一致
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\Pub_Def.h(13,12): message : 参见“StartRun”的前一个定义
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\Pub_Def.cpp(12,22): warning C4273: “MakeKeyHookUdp”: dll 链接不一致
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\Pub_Def.h(15,12): message : 参见“MakeKeyHookUdp”的前一个定义
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\Pub_Def.cpp(17,22): warning C4273: “StopKeyHookUdp”: dll 链接不一致
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\Pub_Def.h(16,12): message : 参见“StopKeyHookUdp”的前一个定义
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\Pub_Def.cpp(22,19): warning C4273: “KeyHookTest”: dll 链接不一致
+  正在生成代码...
+E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\KeyHookP\Pub_Def.h(14,12): message : 参见“KeyHookTest”的前一个定义
+    正在创建库 E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\Debug\KeyHookP.lib 和对象 E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\Debug\KeyHookP.exp
+  KeyHookP.vcxproj -> E:\MyComputer\Documents\workSpace\C\Demo\CSharp_Join_CPlus\Debug\KeyHookP.exe
