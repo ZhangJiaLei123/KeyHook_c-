@@ -14,3 +14,4 @@ DLLAPI int StartRun(CallBackFun pFun);
 DLLAPI int KeyHookTest();
 DLLAPI int MakeKeyHookUdp();
 DLLAPI int StopKeyHookUdp();
+DLLAPI int SendKey(int keyCode);

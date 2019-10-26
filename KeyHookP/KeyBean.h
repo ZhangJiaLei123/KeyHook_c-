@@ -34,6 +34,7 @@ class Keybean
 
 
 public :
+
 	Keybean(PKBDLLHOOKSTRUCT p) {
 		vkCode = p->vkCode;
 		scanCode = p->scanCode;

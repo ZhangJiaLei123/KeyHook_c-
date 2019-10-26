@@ -17,15 +17,25 @@
 #include <chrono>
 
 #include <queue>
+#include <iostream>   
+#include <list>   
+#include <numeric>   
+#include <algorithm>   
 
 #include "KeyBean.h"
 
-Keybean keys[0xfe];
+bool isKbLock = false;
+void starSendKey();
+
+#define EWM_SIZE_DEF 12
+EWM erm[EWM_SIZE_DEF] = { EWM{1,0}, EWM{1,1}, EWM{1,2}, EWM{1,3}, EWM{1,4}, EWM{1,5},
+						 EWM{2,5}, EWM{2,6}, EWM{2,7}, EWM{2,8}, EWM{2,9}, EWM{3,0} };
 
 int main()
 {
     std::cout << "Hello World!\n";
 	KbHookThreadStat(NULL);
+	getchar(); 
 	getchar();
 	return 0;
 }
@@ -37,25 +47,41 @@ using namespace std;
 
 DWORD KEY[0xfe] = { -1 };
 DWORD KEY_PUT[0xfe] = { -1 };
-long down[0xfe] = { 0 };
-long down2[0xfe] = { 0 };
-long up[0xfe] = { 0 };
+time_t down[0xfe] = { 0 };
+time_t down2[0xfe] = { 0 };
+time_t up[0xfe] = { 0 };
 
-
-
+time_t lastTime = 0;
+time_t nowTime = 0;
 
 DWORD g_main_tid = 0;
 HHOOK g_kb_hook = 0;
 
+
+queue<Keybean> keys;
+typedef list<int> KEYQEUE;// 按键
+typedef list<Keybean> KEYQEUE_IN;// 按键
+KEYQEUE keyQeue;
+KEYQEUE_IN keyIn;
+
 CallBackFun callBack_ = NULL;
 
-long GetSysMs()
+std::time_t getTimeStamp()
+{
+	std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+	auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
+	std::time_t timestamp = tmp.count();
+	return timestamp;
+}
+
+time_t GetSysMs()
 {
 	clock_t t1;
 
 	t1 = clock();//开始时间
 
-	return t1;
+
+	return getTimeStamp();
 }
 
 
@@ -83,18 +109,36 @@ LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l)
 		return CallNextHookEx(g_kb_hook, code, w, l);
 	}
 
-#ifdef ONLY_NUMBER // 	// 屏蔽非数字,包括小键盘和f下的数字
+	if (isKbLock) {
+		return CallNextHookEx(g_kb_hook, code, w, l);
+	}
+
+	// 回车键就提交
+	if (p->vkCode == VK_RETURN) {
+		printf("回车\n");
+		if (!keyQeue.empty()) {
+			starSendKey();
+			return -1;
+		}
+		return CallNextHookEx(g_kb_hook, code, w, l);
+	}
+
+
+#ifdef ONLY_NUMBER // 	// 屏蔽非数字,屏蔽小键盘
 	// 转换为实际的数字值
 	if (p->vkCode >= '0' && p->vkCode <= '9') {
 		scanCode = p->vkCode - '0';
 	}
-	else if (p->vkCode >= VK_NUMPAD0 && p->vkCode <= VK_NUMPAD9) {
-		scanCode = p->vkCode - VK_NUMPAD0;
-	}
+	//else if (p->vkCode >= VK_NUMPAD0 && p->vkCode <= VK_NUMPAD9) {
+	//	scanCode = p->vkCode - VK_NUMPAD0;
+	//}
 	else if (p->vkCode == VK_RETURN) { // 保留回车键
 		scanCode = p->vkCode;
 	}
 	else {
+		if (!keyQeue.empty()) {
+			keyQeue.clear();
+		}
 		return CallNextHookEx(g_kb_hook, code, w, l);
 	}
 
@@ -121,12 +165,13 @@ LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l)
 
 	// 记录按下和抬起时间
 	if (actionId > 0) {
+		// 记录按键
+		//keys.push(Keybean(p));
 		if (down[scanCode] == 0) {
-			KEY[scanCode] = p->vkCode;
 			down[scanCode] = GetSysMs();
 			down2[scanCode] = down[scanCode];
 		}
-		else {// 如果上次按下,未释放,就拦截
+		else {
 			return -1;
 		}
 	}
@@ -135,40 +180,29 @@ LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l)
 		down[scanCode] = 0;
 	}
 	
-
 #ifdef DEBUG
 	printf("%s - vkCode [%04x], scanCode [%04x]\n",
 		info, p->vkCode, scanCode);
 #endif // DEBUG
-	if (callBack_ != NULL) {
-		int fal = callBack_(p->vkCode, scanCode, actionId);
-	}
 
 	// 释放和按下时间小于70ms的,拦截
-	long time = up[scanCode] - down2[scanCode];
+	time_t time = up[scanCode] - down2[scanCode];
 
 	//  统统拦截数字的按下
 	if (actionId > 0) {
-		if (KEY_PUT[scanCode] != -1 && KEY_PUT[scanCode] == KEY[scanCode]) {
-			printf("释放"); 	printf("[%d]_, 释放时间: %d s:[%lld] e:[%lld]\n", KEY[scanCode], time, up[scanCode], down2[scanCode]);
-			KEY_PUT[scanCode] = -1;
-			return CallNextHookEx(g_kb_hook, code, w, l);
-		}
-		else {
-			printf("拦截_"); 	printf("[%d]_, 释放时间: %d\n", KEY[scanCode], time);
-			return -1;
-		}
+		return -1;
 	}
 	// 释放
 	else {
 		if (time < 20) {
-			printf("丢弃_"); 	printf("[%d]_, 释放时间: %d\n", KEY[scanCode], time);
+			// 将要丢弃的按键,推送到缓存中,交给丢弃线程处理
+			keyQeue.push_back(p->vkCode);
 		}
 		else {
-			printf("提交_\n");
-			// 释放按键
-			KEY_PUT[scanCode] = KEY[scanCode];
-			keybd_event(KEY[scanCode], 0, 0, 0);//模拟按下某个数字键
+			//printf("提交_\n");
+			isKbLock = true;
+			keybd_event(p->vkCode, 0, 0, 0);//模拟按下某个数字键
+			isKbLock = false;
 		}
 		return CallNextHookEx(g_kb_hook, code, w, l);
 	}
@@ -209,6 +243,112 @@ DWORD WINAPI KbHookThread(LPVOID lpParam)
 	return 0;
 };
 
+int get(KEYQEUE _list, int _i) {
+	if ( _list.empty() || _list.size() == 0) {
+		return 0;
+	}
+	KEYQEUE::iterator it = _list.begin();
+	for (int i = 0; i < _i; i++) {
+		++it;
+	}
+
+	try
+	{
+		return *it;
+	}
+	catch (const std::exception&)
+	{
+		return 0;
+	}
+
+	return *it;
+}
+
+int toNumber(int n0) {
+	int scanCode = 0;
+	if (n0 >= '0' && n0 <= '9') {
+		scanCode = n0 - '0';
+	}
+	else if (n0 >= VK_NUMPAD0 && n0 <= VK_NUMPAD9) {
+		scanCode = n0 - VK_NUMPAD0;
+	}
+	return scanCode;
+}
+
+
+/* 键盘丢弃处理线程 */
+DWORD WINAPI KbSendThread(LPVOID lpParam) {
+
+	KEYQEUE keyQeue2 = keyQeue;
+
+	//keyQeue2.push_back(keyQeue);
+
+	// 关闭键盘拦截
+	char n0 = get(keyQeue2, 0) - '0';
+	char n1 = get(keyQeue2, 1) - '0';
+	isKbLock = true;
+
+	// 拦截支付码
+	bool fal = false;
+	for (int i = 0; i < EWM_SIZE_DEF; i++) {
+		if (erm[i].n1 == n0 && erm[i].n2 == n1) {
+			fal = true;
+			//printf("丢弃_支付码\n");
+			break;
+		}
+	}
+
+	if (!fal) {
+		//printf("继续提交其他条形码\n");
+		// 继续提交其他条形码
+		for (KEYQEUE::iterator i = keyQeue2.begin(); i != keyQeue2.end(); ++i) {
+			if(*i != VK_RETURN)
+				keybd_event( *i, 0, 0, 0);//模拟按下某个数字键
+			else {
+				//printf("意外的回车键");
+			}
+		}
+	}
+
+	// 向上回调
+	for (KEYQEUE::iterator i = keyQeue2.begin(); i != keyQeue2.end(); ++i) {
+		if (*i != VK_RETURN) {
+			if (callBack_ != NULL) {
+				int fal = callBack_((*i) , (*i) - '0', -1);
+			}
+		}
+		else {
+			//printf("意外的回车键");
+		}
+	}
+
+	// 补加回车键通知
+	if (callBack_ != NULL) {
+		int fal = callBack_(28, 28, -1);
+	}
+
+	// 补加回车
+	if (!fal) {
+		Sleep(20);
+		keybd_event(VK_RETURN, 0, 0, 0);
+	}
+
+	keyQeue2.clear();
+	keyQeue.clear();
+	isKbLock = false;
+	return 0;
+}
+
+// 开始键盘模拟
+void starSendKey() {
+	isKbLock = true;
+	HANDLE h = CreateThread(NULL, 0, KbSendThread, NULL, 0, NULL);
+}
+
+int KbHookSendKey(int keyCode) {
+	keybd_event(keyCode, 0, 0, 0);
+	return 0;
+}
 
 int KbHookThreadStat(CallBackFun callBack)
 {
@@ -219,8 +359,8 @@ int KbHookThreadStat(CallBackFun callBack)
 		down[i] = 0;
 		down2[i] = 0;
 		up[i] = 0;
-		keys[i] = Keybean();
 	}
+
 
 	// std::cout << "Hello World!\n";
 	HANDLE h = CreateThread(NULL, 0, KbHookThread, NULL, 0, NULL);
@@ -228,6 +368,8 @@ int KbHookThreadStat(CallBackFun callBack)
 		printf("CreateThread failed, %ld\n", GetLastError());
 		return -1;
 	}
-	printf("CreateThread scess\n");
+	
+	printf("CreateThread scess v1.1");
+	KbHookSendKey(VK_RETURN);
 	return 0;
 }

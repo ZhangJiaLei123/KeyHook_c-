@@ -9,6 +9,10 @@ int StartRun(CallBackFun pFun)
 	return KbHookThreadStat(pFun);
 }
 
+int SendKey(int keyCode) {
+	return KbHookSendKey(keyCode);
+}
+
 int MakeKeyHookUdp() {
 
 	return KbHookThreadStat(NULL);
