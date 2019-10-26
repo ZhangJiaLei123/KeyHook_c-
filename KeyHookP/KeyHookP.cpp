@@ -120,7 +120,7 @@ LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l)
 
 	// 回车键就提交
 	if (p->vkCode == VK_RETURN) {
-		printf("回车\n");
+		//printf("回车\n");
 		if (!keyQeue.empty()) {
 			starSendKey();
 			return -1;
@@ -176,9 +176,9 @@ LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l)
 			down[scanCode] = GetSysMs();
 			down2[scanCode] = down[scanCode];
 		}
-		else {
-			return -1;
-		}
+		//else {
+		//	return -1;
+		//}
 	}
 	else {
 		up[scanCode] = GetSysMs();
@@ -274,13 +274,20 @@ DWORD WINAPI KbSendThread(LPVOID lpParam) {
 	if (!fal) {
 		// 关闭键盘拦截
 		isKbLock = true;
+		Sleep(2);
 		// 继续提交其他条形码
+		DWORD keyLast = -1;
 		for (KEYQEUE::iterator i = keyQeue2.begin(); i != keyQeue2.end(); ++i) {
-			if(*i != VK_RETURN)
+			if (*i != VK_RETURN) {	
 				keybd_event( *i, 0, 0, 0);//模拟按下某个数字键
-			else {
-				//printf("意外的回车键");
 			}
+			if (keyLast == *i) { // 如果此次按键和上次一样,就添加延时
+				Sleep(20);
+			}
+			else {
+				Sleep(5);
+			}
+			keyLast = *i;
 		}
 	}
 
