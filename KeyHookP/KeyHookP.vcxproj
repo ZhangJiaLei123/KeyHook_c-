@@ -155,7 +155,6 @@
     <ClCompile Include="Pub_Def.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="KeyBean.h" />
     <ClInclude Include="KeyHook.h" />
     <ClInclude Include="Pub_Def.h" />
   </ItemGroup>

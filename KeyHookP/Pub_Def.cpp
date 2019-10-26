@@ -1,29 +1,22 @@
-
+// 接口实现
 #include "Pub_Def.h"
 #include "KeyHook.h"
 
-int StartRun(CallBackFun pFun)
+int StartpKeyHook(CallBackFun pFun)
 {
-	//KbHook* pAlarmSer =  new KbHook;
-	//pAlarmSer->run(pFun);
-	return KbHookThreadStat(pFun);
+	return KbHook_ThreadStat(pFun);
+}
+
+int StopKeyHook() {
+
+	return KbHook_ThreadStop();
 }
 
 int SendKey(int keyCode) {
-	return KbHookSendKey(keyCode);
+	return KbHook_SendKey(keyCode);
 }
 
-int MakeKeyHookUdp() {
-
-	return KbHookThreadStat(NULL);
+int SetKbHookLock(int value) {
+	return KbHook_SetHookLock(value);
 }
 
-int StopKeyHookUdp() {
-
-	return 1;
-}
-
-int KeyHookTest() {
-	printf("KeyHookDll make sucess\n");
-	return 1;
-}

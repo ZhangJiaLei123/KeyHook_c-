@@ -7,7 +7,7 @@ typedef struct T_EWM
 	char n2;
 } EWM;
 
-
-int KbHookSendKey(int keyCode);
-int KbHookThreadStat(CallBackFun fun);
-
+int KbHook_SetHookLock(int value);
+int KbHook_SendKey(int keyCode);
+int KbHook_ThreadStat(CallBackFun fun);
+int KbHook_ThreadStop();

@@ -23,65 +23,70 @@
 #include <algorithm>   
 
 #include "KeyBean.h"
+using namespace std;
+typedef list<int> KEYQEUE;// 按键集合
 
-bool isKbLock = false;
+/*****************************************************************************************************/
+/**                                                      宏定义                                     **/
+/*****************************************************************************************************/
+#define VERSION_CODE "1.2_v"  // 版本代码
+
+#define ONLY_NUMBER	// 屏蔽非数字使能
+
+/*****************************************************************************************************/
+/**                                                      方法                                       **/
+/*****************************************************************************************************/
 void starSendKey();
+int get(KEYQEUE _list, int _i);// 获取集合里面的指定元素
 
+/*****************************************************************************************************/
+/**                                                      变量                                       **/
+/*****************************************************************************************************/
+
+// 拦截使能
+bool isKbOpen = false;
+// 拦截使能
+bool isKbLock = false;
+// 监听回调
+CallBackFun callBack_ = NULL;
+
+// 支付码数量
 #define EWM_SIZE_DEF 12
+// 支付码
 EWM erm[EWM_SIZE_DEF] = { EWM{1,0}, EWM{1,1}, EWM{1,2}, EWM{1,3}, EWM{1,4}, EWM{1,5},
 						 EWM{2,5}, EWM{2,6}, EWM{2,7}, EWM{2,8}, EWM{2,9}, EWM{3,0} };
 
-int main()
-{
-    std::cout << "Hello World!\n";
-	KbHookThreadStat(NULL);
-	getchar(); 
-	getchar();
-	return 0;
-}
+DWORD g_main_tid = 0; // 主线程id
+HHOOK g_kb_hook = 0;  // 监听线程id
 
 
-#define ONLY_NUMBER
+KEYQEUE keyQeue;          // 要丢弃的按键缓存
 
-using namespace std;
-
-DWORD KEY[0xfe] = { -1 };
-DWORD KEY_PUT[0xfe] = { -1 };
+// 按下与松开时间
 time_t down[0xfe] = { 0 };
 time_t down2[0xfe] = { 0 };
 time_t up[0xfe] = { 0 };
 
-time_t lastTime = 0;
-time_t nowTime = 0;
 
-DWORD g_main_tid = 0;
-HHOOK g_kb_hook = 0;
+/*****************************************************************************************************/
+/**                                                     程序开始                                    **/
+/*****************************************************************************************************/
+// 测试主函数
+int main()
+{
+    std::cout << "Hello World!\n";
+	KbHook_ThreadStat(NULL);
+	return 0;
+}
 
 
-queue<Keybean> keys;
-typedef list<int> KEYQEUE;// 按键
-typedef list<Keybean> KEYQEUE_IN;// 按键
-KEYQEUE keyQeue;
-KEYQEUE_IN keyIn;
-
-CallBackFun callBack_ = NULL;
-
-std::time_t getTimeStamp()
+// 获取时间戳
+time_t GetSysMs()
 {
 	std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
 	auto tmp = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
 	std::time_t timestamp = tmp.count();
 	return timestamp;
-}
-
-time_t GetSysMs()
-{
-	clock_t t1;
-
-	t1 = clock();//开始时间
-
-
-	return getTimeStamp();
 }
 
 
@@ -217,7 +222,7 @@ LRESULT CALLBACK kb_proc(int code, WPARAM w, LPARAM l)
 DWORD WINAPI KbHookThread(LPVOID lpParam)
 {
 	g_main_tid = GetCurrentThreadId();
-
+	isKbOpen = true;
 	//注册Ctrl + C调
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)&con_handler, TRUE);
 	g_kb_hook = SetWindowsHookEx(WH_KEYBOARD_LL, // 安装一个钩子子程来监视低级键盘输入事件。
@@ -236,70 +241,39 @@ DWORD WINAPI KbHookThread(LPVOID lpParam)
 	while (GetMessage(&msg, NULL, 0, 0)) {
 		TranslateMessage(&msg); // 消息转义
 		DispatchMessage(&msg);  // 释放消息
+		if (!isKbOpen) { // 键盘监听开关
+			break;
+		}
 	}
 
+	isKbOpen = false;
 	// 退出线程
 	UnhookWindowsHookEx(g_kb_hook);
 	return 0;
 };
 
-int get(KEYQEUE _list, int _i) {
-	if ( _list.empty() || _list.size() == 0) {
-		return 0;
-	}
-	KEYQEUE::iterator it = _list.begin();
-	for (int i = 0; i < _i; i++) {
-		++it;
-	}
-
-	try
-	{
-		return *it;
-	}
-	catch (const std::exception&)
-	{
-		return 0;
-	}
-
-	return *it;
-}
-
-int toNumber(int n0) {
-	int scanCode = 0;
-	if (n0 >= '0' && n0 <= '9') {
-		scanCode = n0 - '0';
-	}
-	else if (n0 >= VK_NUMPAD0 && n0 <= VK_NUMPAD9) {
-		scanCode = n0 - VK_NUMPAD0;
-	}
-	return scanCode;
-}
-
-
 /* 键盘丢弃处理线程 */
 DWORD WINAPI KbSendThread(LPVOID lpParam) {
 
+
 	KEYQEUE keyQeue2 = keyQeue;
 
-	//keyQeue2.push_back(keyQeue);
-
-	// 关闭键盘拦截
+	// 获取第1 和 2 个数字,判断是否是微信和支付宝的 条码
 	char n0 = get(keyQeue2, 0) - '0';
 	char n1 = get(keyQeue2, 1) - '0';
-	isKbLock = true;
 
 	// 拦截支付码
 	bool fal = false;
 	for (int i = 0; i < EWM_SIZE_DEF; i++) {
 		if (erm[i].n1 == n0 && erm[i].n2 == n1) {
 			fal = true;
-			//printf("丢弃_支付码\n");
-			break;
+			break;	//printf("丢弃_支付码\n");
 		}
 	}
-
+	
 	if (!fal) {
-		//printf("继续提交其他条形码\n");
+		// 关闭键盘拦截
+		isKbLock = true;
 		// 继续提交其他条形码
 		for (KEYQEUE::iterator i = keyQeue2.begin(); i != keyQeue2.end(); ++i) {
 			if(*i != VK_RETURN)
@@ -317,9 +291,6 @@ DWORD WINAPI KbSendThread(LPVOID lpParam) {
 				int fal = callBack_((*i) , (*i) - '0', -1);
 			}
 		}
-		else {
-			//printf("意外的回车键");
-		}
 	}
 
 	// 补加回车键通知
@@ -327,14 +298,16 @@ DWORD WINAPI KbSendThread(LPVOID lpParam) {
 		int fal = callBack_(28, 28, -1);
 	}
 
-	// 补加回车
+	// 补加回车,支付码的回车键不添加
 	if (!fal) {
 		Sleep(20);
 		keybd_event(VK_RETURN, 0, 0, 0);
 	}
 
+	// 清空队列
 	keyQeue2.clear();
 	keyQeue.clear();
+	// 关闭监听锁
 	isKbLock = false;
 	return 0;
 }
@@ -345,31 +318,69 @@ void starSendKey() {
 	HANDLE h = CreateThread(NULL, 0, KbSendThread, NULL, 0, NULL);
 }
 
-int KbHookSendKey(int keyCode) {
+// 发送模拟键盘
+int KbHook_SendKey(int keyCode) {
 	keybd_event(keyCode, 0, 0, 0);
 	return 0;
 }
 
-int KbHookThreadStat(CallBackFun callBack)
+// 设置键盘锁使能
+int KbHook_SetHookLock(int value) {
+	if (value == 0) {
+		isKbLock = false;
+	}
+	else {
+		isKbLock = true;
+	}
+	
+	return isKbLock;
+}
+
+// 开启键盘监听线程
+int KbHook_ThreadStat(CallBackFun callBack)
 {
 	callBack_ = callBack;
 	for (int i = 0; i < 0xfe; i++) {
-		KEY_PUT[i] = -1;
-		KEY[i] = -2;
 		down[i] = 0;
 		down2[i] = 0;
 		up[i] = 0;
 	}
 
-
-	// std::cout << "Hello World!\n";
 	HANDLE h = CreateThread(NULL, 0, KbHookThread, NULL, 0, NULL);
 	if (NULL == h) {
 		printf("CreateThread failed, %ld\n", GetLastError());
 		return -1;
 	}
 	
-	printf("CreateThread scess v1.1");
-	KbHookSendKey(VK_RETURN);
+	printf("CreateThread scess %s", VERSION_CODE);
+	KbHook_SendKey(VK_RETURN);
 	return 0;
+}
+
+// 关闭监听
+int KbHook_ThreadStop() {
+	isKbOpen = false;
+	return 0;
+}
+
+// 获取集合里面的指定元素
+int get(KEYQEUE _list, int _i) {
+	if (_list.empty() || _list.size() == 0) {
+		return 0;
+	}
+	KEYQEUE::iterator it = _list.begin();
+	for (int i = 0; i < _i; i++) {
+		++it;
+	}
+
+	try
+	{
+		return *it;
+	}
+	catch (const std::exception&)
+	{
+		return 0;
+	}
+
+	return *it;
 }
